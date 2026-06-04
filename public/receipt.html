@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiFlow - Receipt</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .receipt { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #007bff; margin-bottom: 5px; }
+        .company-info { color: #666; font-size: 14px; }
+        .receipt-title { font-size: 24px; color: #333; margin-bottom: 20px; text-align: center; }
+        .info-section { margin-bottom: 25px; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .label { font-weight: bold; color: #333; }
+        .value { color: #666; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .items-table th { background: #f8f9fa; font-weight: bold; }
+        .total-section { border-top: 2px solid #007bff; padding-top: 15px; margin-top: 20px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .grand-total { font-size: 18px; font-weight: bold; color: #007bff; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; }
+        .actions { text-align: center; margin: 20px 0; }
+        .btn { padding: 10px 20px; margin: 0 10px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        @media print { .actions, .btn { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="receipt" id="receipt">
+        <div class="header">
+            <div class="logo">LogiFlow</div>
+            <div class="company-info">Professional Logistics Solutions<br>Email: info@logiflow.com | Phone: (555) 123-4567</div>
+        </div>
+        
+        <div class="receipt-title">SHIPPING RECEIPT</div>
+        
+        <div class="info-section">
+            <div class="info-row">
+                <span class="label">Receipt #:</span>
+                <span class="value" id="receiptId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date:</span>
+                <span class="value" id="receiptDate">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Tracking ID:</span>
+                <span class="value" id="trackingId">-</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>Sender Information</h3>
+            <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value" id="senderName">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Phone:</span>
+                <span class="value" id="senderPhone">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Address:</span>
+                <span class="value" id="fromAddress">-</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>Recipient Information</h3>
+            <div class="info-row">
+                <span class="label">Name:</span>
+                <span class="value" id="recipientName">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Phone:</span>
+                <span class="value" id="recipientPhone">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Address:</span>
+                <span class="value" id="toAddress">-</span>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>Service Details</h3>
+            <div class="info-row">
+                <span class="label">Service Type:</span>
+                <span class="value" id="serviceType">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Status:</span>
+                <span class="value" id="shipmentStatus" style="color: #007bff; font-weight: bold;">In Transit</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Estimated Delivery:</span>
+                <span class="value" id="estimatedDelivery">-</span>
+            </div>
+        </div>
+        
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Weight</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+            </tbody>
+        </table>
+        
+        <div class="total-section">
+            <div class="total-row">
+                <span class="label">Subtotal:</span>
+                <span class="value" id="subtotal">$0.00</span>
+            </div>
+            <div class="total-row">
+                <span class="label">Tax (10%):</span>
+                <span class="value" id="tax">$0.00</span>
+            </div>
+            <div class="total-row grand-total">
+                <span class="label">Total:</span>
+                <span class="value" id="total">$0.00</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Thank you for choosing LogiFlow!<br>
+            For support, contact us at support@logiflow.com
+        </div>
+    </div>
+    
+    <div class="actions">
+        <button class="btn btn-primary" onclick="window.print()">Print Receipt</button>
+        <button class="btn btn-secondary" onclick="downloadPDF()">Download PDF</button>
+        <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
+    </div>
+    
+    <script>
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                trackingId: params.get('trackingId'),
+                receiptId: params.get('receiptId')
+            };
+        }
+        
+        async function loadReceipt() {
+            const { trackingId, receiptId } = getUrlParams();
+            console.log('Loading receipt with params:', { trackingId, receiptId });
+            
+            // Try to get receipt from localStorage first (for fresh bookings)
+            const storedReceipt = localStorage.getItem(`receipt_${receiptId}`);
+            console.log('Stored receipt:', storedReceipt);
+            
+            if (storedReceipt) {
+                const receipt = JSON.parse(storedReceipt);
+                console.log('Using stored receipt:', receipt);
+                populateReceipt(receipt);
+                return;
+            }
+            
+            // Try with tracking ID if receipt ID not found
+            if (trackingId) {
+                const storedByTracking = localStorage.getItem(`receipt_${trackingId}`);
+                console.log('Stored by tracking:', storedByTracking);
+                if (storedByTracking) {
+                    const receipt = JSON.parse(storedByTracking);
+                    console.log('Using tracking receipt:', receipt);
+                    populateReceipt(receipt);
+                    return;
+                }
+            }
+            
+            if (!trackingId && !receiptId) {
+                console.log('No receipt information provided');
+                // Create a sample receipt for testing
+                const sampleReceipt = {
+                    receiptId: 'RC123456',
+                    trackingId: 'LG12345678',
+                    date: new Date().toISOString(),
+                    from: 'Sample Pickup Address',
+                    to: 'Sample Delivery Address',
+                    senderName: 'John Doe',
+                    senderPhone: '+1 555-123-4567',
+                    recipientName: 'Jane Smith',
+                    recipientPhone: '+1 555-987-6543',
+                    service: 'Standard',
+                    status: 'In Transit',
+                    items: [{
+                        description: 'Package Shipping (Standard)',
+                        weight: '2 kg',
+                        rate: 7.99,
+                        amount: 15.98
+                    }],
+                    subtotal: 15.98,
+                    tax: 1.28,
+                    total: 17.26,
+                    estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
+                };
+                populateReceipt(sampleReceipt);
+                return;
+            }
+            
+            try {
+                console.log('Fetching from API:', `/api/receipt/${receiptId || trackingId}`);
+                const response = await fetch(`/api/receipt/${receiptId || trackingId}`);
+                const receipt = await response.json();
+                console.log('API response:', receipt);
+                
+                if (response.ok) {
+                    populateReceipt(receipt);
+                } else {
+                    console.error('Receipt not found');
+                    alert('Receipt not found');
+                }
+            } catch (error) {
+                console.error('Error loading receipt:', error);
+                alert('Failed to load receipt');
+            }
+        }
+        
+        function populateReceipt(data) {
+            console.log('Populating receipt with data:', data);
+            document.getElementById('receiptId').textContent = data.receiptId || 'N/A';
+            document.getElementById('receiptDate').textContent = data.date ? new Date(data.date).toLocaleDateString() : new Date().toLocaleDateString();
+            document.getElementById('trackingId').textContent = data.trackingId || 'N/A';
+            document.getElementById('senderName').textContent = data.senderName || 'N/A';
+            document.getElementById('senderPhone').textContent = data.senderPhone || 'N/A';
+            document.getElementById('fromAddress').textContent = data.from || 'N/A';
+            document.getElementById('recipientName').textContent = data.recipientName || 'N/A';
+            document.getElementById('recipientPhone').textContent = data.recipientPhone || 'N/A';
+            document.getElementById('toAddress').textContent = data.to || 'N/A';
+            document.getElementById('serviceType').textContent = data.service || 'Standard';
+            document.getElementById('shipmentStatus').textContent = data.status || 'In Transit';
+            document.getElementById('estimatedDelivery').textContent = data.estimatedDelivery ? 
+                new Date(data.estimatedDelivery).toLocaleDateString() : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString();
+            
+            const itemsBody = document.getElementById('itemsBody');
+            itemsBody.innerHTML = '';
+            
+            if (data.items && data.items.length > 0) {
+                data.items.forEach(item => {
+                    const row = itemsBody.insertRow();
+                    row.innerHTML = `
+                        <td>${item.description || 'Package Shipping'}</td>
+                        <td>${item.weight || '1 kg'}</td>
+                        <td>$${(item.rate || 15.99).toFixed(2)}</td>
+                        <td>$${(item.amount || 15.99).toFixed(2)}</td>
+                    `;
+                });
+            } else {
+                const row = itemsBody.insertRow();
+                row.innerHTML = `
+                    <td>Package Shipping</td>
+                    <td>1 kg</td>
+                    <td>$${(data.subtotal || 15.99).toFixed(2)}</td>
+                    <td>$${(data.subtotal || 15.99).toFixed(2)}</td>
+                `;
+            }
+            
+            document.getElementById('subtotal').textContent = `$${(data.subtotal || 15.99).toFixed(2)}`;
+            document.getElementById('tax').textContent = `$${(data.tax || 1.28).toFixed(2)}`;
+            document.getElementById('total').textContent = `$${(data.total || 17.27).toFixed(2)}`;
+            
+            console.log('Receipt populated successfully');
+        }
+        
+        function downloadPDF() {
+            const element = document.getElementById('receipt');
+            const opt = {
+                margin: 0.5,
+                filename: `receipt-${document.getElementById('receiptId').textContent}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'letter', 
+                    orientation: 'portrait'
+                }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+        
+        // Auto-download PDF if download parameter is present
+        function checkAutoDownload() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('download') === 'true') {
+                // Wait a bit for the receipt to load, then download
+                setTimeout(() => {
+                    downloadPDF();
+                }, 1000);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadReceipt();
+            checkAutoDownload();
+        });
+    </script>
+</body>
+</html>

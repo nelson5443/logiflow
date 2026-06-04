@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo \"🚀 Deploying LogiFlow Logistics Website...\"\n\n# Install dependencies\necho \"📦 Installing dependencies...\"\nnpm install\n\n# Run tests (if any)\necho \"🧪 Running tests...\"\nnpm test --if-present\n\n# Build project (if needed)\necho \"🔨 Building project...\"\nnpm run build --if-present\n\n# Deploy to Vercel\necho \"☁️ Deploying to Vercel...\"\nnpx vercel --prod\n\necho \"✅ Deployment complete!\"\necho \"🌐 Your logistics website is now live!\"

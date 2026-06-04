@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiFlow - Professional Logistics Solutions</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>window.initMaps = function() { console.log('Maps ready'); };</script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8Q8X9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9Z&libraries=places&callback=initMaps" async defer onerror="console.log('Maps failed to load')"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/4.1.7/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+        </select>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-truck"></i>
+                <span data-translate="nav.brand">LogiFlow</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" data-translate="nav.home">Home</a></li>
+                <li><a href="#services" data-translate="nav.services">Services</a></li>
+                <li><a href="#booking" data-translate="nav.booking">Book Shipment</a></li>
+                <li><a href="#tracking" data-translate="nav.tracking">Track Package</a></li>
+                <li><a href="#analytics" data-translate="nav.analytics">Analytics</a></li>
+                <li><a href="#contact" data-translate="nav.contact">Contact</a></li>
+                <li><a href="admin.html" data-translate="nav.admin">Admin</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Fast, Reliable Logistics Solutions</h1>
+            <p>Your trusted partner for shipping, warehousing, and supply chain management worldwide</p>
+            <div class="hero-buttons">
+                <a href="#booking" class="btn btn-primary">Ship Now</a>
+                <a href="#tracking" class="btn btn-secondary">Track Package</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2>Our Services</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Express Delivery</h3>
+                    <p>Same-day and next-day delivery options for urgent shipments</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-warehouse"></i>
+                    <h3>Warehousing</h3>
+                    <p>Secure storage solutions with inventory management</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-globe"></i>
+                    <h3>International Shipping</h3>
+                    <p>Worldwide shipping with customs clearance support</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Supply Chain</h3>
+                    <p>End-to-end supply chain optimization and management</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section id="booking" class="booking">
+        <div class="container">
+            <h2 data-translate="booking.title">Book Your Shipment</h2>
+            <form id="bookingForm" class="booking-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-translate="booking.senderName">Sender Name</label>
+                        <input type="text" name="senderName" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="booking.senderPhone">Sender Phone</label>
+                        <input type="tel" name="senderPhone" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-translate="booking.pickupAddress">Pickup Address</label>
+                    <div class="address-input">
+                        <textarea name="pickupAddress" id="pickupAddress" required></textarea>
+                        <button type="button" onclick="detectLocation('pickup')" class="location-btn">
+                            <i class="fas fa-location-arrow"></i> <span data-translate="booking.detectLocation">Detect Location</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-translate="booking.recipientName">Recipient Name</label>
+                        <input type="text" name="recipientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="booking.recipientPhone">Recipient Phone</label>
+                        <input type="tel" name="recipientPhone" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-translate="booking.deliveryAddress">Delivery Address</label>
+                    <div class="address-input">
+                        <textarea name="deliveryAddress" id="deliveryAddress" required></textarea>
+                        <button type="button" onclick="detectLocation('delivery')" class="location-btn">
+                            <i class="fas fa-location-arrow"></i> <span data-translate="booking.detectLocation">Detect Location</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label data-translate="booking.packageType">Package Type</label>
+                        <select name="packageType" required>
+                            <option value="" data-translate="booking.selectType">Select Type</option>
+                            <option value="document" data-translate="booking.document">Document</option>
+                            <option value="package" data-translate="booking.package">Package</option>
+                            <option value="fragile" data-translate="booking.fragile">Fragile Item</option>
+                            <option value="bulk" data-translate="booking.bulk">Bulk Cargo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label data-translate="booking.weight">Weight (kg)</label>
+                        <input type="number" name="weight" step="0.1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-translate="booking.instructions">Special Instructions</label>
+                    <textarea name="instructions" data-translate-placeholder="booking.instructionsPlaceholder" placeholder="Any special handling requirements..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" data-translate="booking.submit">Book Shipment</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Tracking Section -->
+    <section id="tracking" class="tracking">
+        <div class="container">
+            <h2 data-translate="tracking.title">Track Your Package</h2>
+            <div class="tracking-form">
+                <div class="tracking-input-group">
+                    <input type="text" id="trackingInput" data-translate-placeholder="tracking.placeholder" placeholder="Enter tracking ID (e.g., LG1234567890)">
+                    <button onclick="trackPackage()" class="btn btn-primary" data-translate="tracking.track">Track</button>
+                    <button onclick="startBarcodeScanner()" class="btn btn-secondary">
+                        <i class="fas fa-camera"></i> <span data-translate="tracking.scan">Scan</span>
+                    </button>
+                </div>
+                <div id="barcodeScanner" style="display:none;">
+                    <div id="scanner"></div>
+                    <button onclick="stopBarcodeScanner()" class="btn btn-secondary" data-translate="tracking.stopScan">Stop Scanning</button>
+                </div>
+            </div>
+            <div id="trackingResult" class="tracking-result">
+                <div id="trackingMap" style="height: 400px; display: none; margin: 20px 0;"></div>
+                <div id="qrCodeSection" style="display: none; text-align: center; margin: 20px 0;">
+                    <h4 data-translate="tracking.qrCode">QR Code for Easy Tracking</h4>
+                    <div id="qrcode"></div>
+                    <p data-translate="tracking.qrInstructions">Scan this QR code to quickly access tracking information</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analytics Section -->
+    <section id="analytics" class="analytics">
+        <div class="container">
+            <h2 data-translate="analytics.title">Delivery Analytics</h2>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3 data-translate="analytics.totalShipments">Total Shipments</h3>
+                    <p class="analytics-number" id="totalShipments">0</p>
+                </div>
+                <div class="analytics-card">
+                    <i class="fas fa-clock"></i>
+                    <h3 data-translate="analytics.avgDeliveryTime">Avg Delivery Time</h3>
+                    <p class="analytics-number" id="avgDeliveryTime">2.5 days</p>
+                </div>
+                <div class="analytics-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3 data-translate="analytics.successRate">Success Rate</h3>
+                    <p class="analytics-number" id="successRate">98.5%</p>
+                </div>
+                <div class="analytics-card">
+                    <i class="fas fa-star"></i>
+                    <h3 data-translate="analytics.customerRating">Customer Rating</h3>
+                    <p class="analytics-number" id="customerRating">4.8/5</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2>Contact Us</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <h4>Email</h4>
+                            <p>info@logiflow.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h4>Address</h4>
+                            <p>123 Logistics Ave, Business District</p>
+                        </div>
+                    </div>
+                </div>
+                <form id="contactForm" class="contact-form">
+                    <div class="form-group">
+                        <input type="text" name="name" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" name="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="message" placeholder="Your Message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>LogiFlow</h3>
+                    <p>Your trusted logistics partner for reliable shipping solutions worldwide.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#booking">Book Shipment</a></li>
+                        <li><a href="#tracking">Track Package</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Follow Us</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 LogiFlow. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Live Chat Widget -->
+    <div id="chatWidget" class="chat-widget">
+        <div class="chat-header" onclick="toggleChat()">
+            <i class="fas fa-comments"></i>
+            <span data-translate="chat.support">Live Support</span>
+            <i class="fas fa-chevron-up" id="chatToggle"></i>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <span data-translate="chat.welcome">Hello! How can I help you today?</span>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" data-translate-placeholder="chat.placeholder" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendMessage()" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signature Modal -->
+    <div id="signatureModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3 data-translate="signature.title">Digital Signature</h3>
+            <canvas id="signaturePad" width="400" height="200"></canvas>
+            <div class="signature-buttons">
+                <button onclick="clearSignature()" class="btn btn-secondary" data-translate="signature.clear">Clear</button>
+                <button onclick="saveSignature()" class="btn btn-primary" data-translate="signature.save">Save</button>
+                <button onclick="closeSignatureModal()" class="btn btn-secondary" data-translate="signature.cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/features.js"></script>
+</body>
+</html>

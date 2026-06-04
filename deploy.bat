@@ -1,0 +1,1 @@
+@echo off\necho 🚀 Deploying LogiFlow Logistics Website...\n\necho 📦 Installing dependencies...\nnpm install\n\necho 🧪 Running tests...\nnpm test 2>nul\n\necho 🔨 Building project...\nnpm run build 2>nul\n\necho ☁️ Deploying to Vercel...\nnpx vercel --prod\n\necho ✅ Deployment complete!\necho 🌐 Your logistics website is now live!\npause
