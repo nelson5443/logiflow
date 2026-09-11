@@ -291,27 +291,23 @@
         </div>
     </footer>
 
-    <!-- Live Chat Widget -->
-    <div id="chatWidget" class="chat-widget">
-        <div class="chat-header" onclick="toggleChat()">
-            <i class="fas fa-comments"></i>
-            <span data-translate="chat.support">Live Support</span>
-            <i class="fas fa-chevron-up" id="chatToggle"></i>
-        </div>
-        <div class="chat-body" id="chatBody">
-            <div class="chat-messages" id="chatMessages">
-                <div class="message bot-message">
-                    <span data-translate="chat.welcome">Hello! How can I help you today?</span>
-                </div>
-            </div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" data-translate-placeholder="chat.placeholder" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
-                <button onclick="sendMessage()" class="btn btn-primary">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Chaport Live Chat -->
+    <script type="text/javascript">
+        (function(w,d,v3){
+        w.chaportConfig = {
+          appId : '6a4795b8c8c6970d5aef8722'
+        };
+        if(w.chaport)return;v3=w.chaport={};v3._q=[];v3._l={};
+        v3.q=function(){v3._q.push(arguments);};
+        v3.on=function(e,fn){if(!v3._l[e])v3._l[e]=[];v3._l[e].push(fn);};
+        var s=d.createElement('script');
+        s.type='text/javascript';
+        s.async=true;
+        s.src='https://app.chaport.com/javascripts/insert.js';
+        var ss=d.getElementsByTagName('script')[0];
+        ss.parentNode.insertBefore(s,ss);
+        })(window, document, 3);
+    </script>
 
     <!-- Signature Modal -->
     <div id="signatureModal" class="modal" style="display: none;">
