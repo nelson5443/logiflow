@@ -1,3 +1,33 @@
+async function manualUpdateStatus() {
+    const trackingId = document.getElementById('manualTrackingId').value.trim();
+    const status = document.getElementById('manualStatus').value;
+    const resultDiv = document.getElementById('manualUpdateResult');
+
+    if (!trackingId) {
+        resultDiv.innerHTML = '<p style="color:#f44336;">⚠️ Please enter a Tracking ID.</p>';
+        return;
+    }
+
+    const token = localStorage.getItem('adminToken');
+    try {
+        const response = await fetch(`/api/admin/shipments/${trackingId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ status })
+        });
+        const result = await response.json();
+        if (result.success) {
+            resultDiv.innerHTML = `<p style="color:#4caf50;">✅ <strong>${trackingId}</strong> updated to <strong>${status}</strong></p>`;
+            document.getElementById('manualTrackingId').value = '';
+            loadShipments();
+        } else {
+            resultDiv.innerHTML = `<p style="color:#f44336;">❌ Failed: ${result.error || 'Unknown error'}</p>`;
+        }
+    } catch (e) {
+        resultDiv.innerHTML = '<p style="color:#f44336;">❌ Network error. Please try again.</p>';
+    }
+}
+
 // Load shipments on page load
 document.addEventListener('DOMContentLoaded', () => {
     if (!checkAuth()) return;

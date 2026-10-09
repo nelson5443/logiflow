@@ -57,6 +57,33 @@
 
         <div class="admin-section">
             <h2>Shipment Management</h2>
+
+            <!-- Manual Status Update -->
+            <div style="background:#f0f4ff;border:2px solid #1a237e;border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;">
+                <h3 style="color:#1a237e;margin-bottom:1rem;"><i class="fas fa-edit"></i> Update Any Shipment Status</h3>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                    <div style="flex:1;min-width:200px;">
+                        <label style="display:block;font-weight:bold;color:#1a237e;margin-bottom:5px;">Tracking ID</label>
+                        <input type="text" id="manualTrackingId" placeholder="e.g. LG12345678" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:5px;font-size:1rem;">
+                    </div>
+                    <div style="flex:1;min-width:200px;">
+                        <label style="display:block;font-weight:bold;color:#1a237e;margin-bottom:5px;">New Status</label>
+                        <select id="manualStatus" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:5px;font-size:1rem;color:#1a237e;">
+                            <option value="Pending">Pending</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="In Transit">In Transit</option>
+                            <option value="On Hold">On Hold</option>
+                            <option value="Out for Delivery">Out for Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                    <button onclick="manualUpdateStatus()" class="btn btn-primary" style="padding:10px 24px;white-space:nowrap;">
+                        <i class="fas fa-save"></i> Update Status
+                    </button>
+                </div>
+                <div id="manualUpdateResult" style="margin-top:10px;"></div>
+            </div>
+
             <div class="shipments-table">
                 <table id="shipmentsTable">
                     <thead>
@@ -69,7 +96,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody><tr><td colspan="6" style="text-align:center;color:#999;padding:2rem;">No shipments yet. Book a shipment from the main site to see it here.</td></tr></tbody>
                 </table>
             </div>
         </div>

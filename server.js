@@ -23,9 +23,10 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
+        origin: process.env.RENDER_EXTERNAL_URL || "*",
         methods: ["GET", "POST"]
-    }
+    },
+    transports: ['websocket', 'polling']
 });
 const PORT = process.env.PORT || 3000;
 
@@ -190,7 +191,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // Admin endpoints
-app.get('/api/admin/shipments', (req, res) => {
+app.get('/api/admin/shipments', async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -200,8 +201,22 @@ app.get('/api/admin/shipments', (req, res) => {
     } catch (error) {
         return res.status(401).json({ error: 'Invalid or expired token' });
     }
-    
-    // Return shipments in admin format
+
+    // Try Supabase first
+    if (supabase) {
+        const { data, error } = await supabase.from('shipments').select('*').order('created_at', { ascending: false });
+        if (!error && data) {
+            // Merge with in-memory (admin status updates not yet in DB)
+            const dbIds = new Set(data.map(s => s.tracking_number));
+            const memOnly = shipments
+                .filter(s => !dbIds.has(s.id))
+                .map(s => ({ id: s.id, sender_name: s.senderName, recipient_name: s.recipientName, status: s.status, created_at: s.createdAt }));
+            const dbFormatted = data.map(s => ({ id: s.tracking_number, sender_name: s.sender_name, recipient_name: s.recipient_name, status: s.status, created_at: s.created_at }));
+            return res.json([...dbFormatted, ...memOnly]);
+        }
+    }
+
+    // Fallback to in-memory
     const adminShipments = shipments.map(s => ({
         id: s.id,
         sender_name: s.senderName,
@@ -209,13 +224,12 @@ app.get('/api/admin/shipments', (req, res) => {
         status: s.status,
         created_at: s.createdAt
     }));
-    
     res.json(adminShipments);
 });
 
 const VALID_STATUSES = ['Pending', 'Shipped', 'In Transit', 'On Hold', 'Out for Delivery', 'Delivered'];
 
-app.put('/api/admin/shipments/:id/status', (req, res) => {
+app.put('/api/admin/shipments/:id/status', async (req, res) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -270,6 +284,11 @@ app.put('/api/admin/shipments/:id/status', (req, res) => {
         location: locationMap[status] || 'Processing Center',
         timestamp: new Date().toISOString()
     }];
+
+    // Also update in Supabase
+    if (supabase) {
+        await supabase.from('shipments').update({ status, updates: JSON.stringify(shipment.updates) }).eq('tracking_number', trackingId);
+    }
 
     // Broadcast real-time status update to anyone tracking this package
     io.to(`tracking_${trackingId}`).emit('statusUpdate', { trackingId, status });
